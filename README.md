@@ -32,5 +32,7 @@ python bot.py
 
 ## Tips
 
+>**Tip** : Python 3.10 or higher is required.
+
 >**Tip** : You should be aware that this program does not using Twitter API (directly).
 ---

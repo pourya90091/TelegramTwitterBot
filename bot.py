@@ -37,6 +37,8 @@ ADMINS = os.getenv("ADMINS")
 
 
 def admin_check(func):
+    """Gives permission to those who can access this bot (admins)."""
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         update = args[0]
@@ -51,7 +53,7 @@ def admin_check(func):
 async def start_handle(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text(f"""
 Hey @{update.message.from_user.username}, i'm here to help you out.
-                                    
+
 My commands:
     /select
     /export
@@ -77,6 +79,8 @@ async def select_handle(update: Update, context: CallbackContext) -> None:
 
 @admin_check
 async def export_handle(update: Update, context: CallbackContext) -> None:
+    """Sends a .csv file which contains all recorded replied comments to Admin."""
+
     file_name = database.export_all_replies()
 
     await update.message.reply_document(document=open(f"{BASE_DIR}/{file_name}", "rb"))
@@ -84,6 +88,7 @@ async def export_handle(update: Update, context: CallbackContext) -> None:
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Parses the CallbackQuery and calls core.comment() function."""
+
     query = update.callback_query
 
     # CallbackQueries need to be answered, even if no notification to the user is needed
@@ -101,7 +106,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             InlineKeyboardButton("Reply URL", url=result),
         ]
     ])
-    await context.bot.send_message(chat_id=query.message.chat_id, text=f"Reply URL:", reply_markup=reply_markup)
+    await context.bot.send_message(chat_id=query.message.chat_id, text=f"Reply URL (@{query.data}):", reply_markup=reply_markup)
 
 
 def run_bot() -> None:

@@ -85,12 +85,9 @@ async def get_context(browser: Browser) -> BrowserContext:
     return context
 
 
-async def get_page(context: BrowserContext) -> Page:
-    page = await context.new_page()
-    return page
-
-
 async def open_page(context: BrowserContext, url) -> None:
+    """Tries to create and fully load a page."""
+
     try:
         page = await context.new_page()
         await page.goto(url, timeout=0, wait_until="load")
@@ -101,6 +98,8 @@ async def open_page(context: BrowserContext, url) -> None:
 
 
 async def comment(account: str) -> str:
+    """Performs a procedure to reply a random comment to a random tweet of selected account."""
+
     async def get_current_tweet() -> list[ElementHandle]:
         """Fetchs loaded tweets."""
 
@@ -139,7 +138,7 @@ async def comment(account: str) -> str:
         try:
             tweets_container = await page.query_selector(tweets_container_xpath)
         except Error:
-            return "Tweets container didn't load."
+            raise Exception("Tweets container didn't load.")
 
         current_tweets = await get_current_tweet()
 
@@ -152,7 +151,7 @@ async def comment(account: str) -> str:
         tweet_url = page.url
 
         if database.is_tweet_exists(tweet_url):
-            return "An already replied tweet was selected."
+            raise Exception("An already replied tweet was selected.")
 
         await click_on_element(page, "xpath=.//button[@data-testid='reply']")
 
