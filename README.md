@@ -17,6 +17,7 @@ playwright install-deps chromium
 ```
 
 ### Configuration
+
 - Set settings at `/.env`.
     - **AUTH_TOKEN**: Will be used to log into a Twitter account, obtain it from your browser.
     Open your Browser, open https://twitter.com and login to an account, then open Developer Tools (F12) and open Application tab. Open Cookies from Storage section and copy the value of auth_token cookie, done, you now have your AUTH_TOKEN.
@@ -34,5 +35,5 @@ python bot.py
 
 >**Tip** : Python 3.10 or higher is required.
 
->**Tip** : You should be aware that this program does not using Twitter API (directly).
+>**Tip** : You should be aware that this program does not using Twitter API (directly) and you must use a Twitter account that can post replies.
 ---

@@ -34,7 +34,7 @@ def is_tweet_exists(tweet_url):
 
 
 def export_all_replies():
-    replies = cur.execute(f"""SELECT * FROM replies;""").fetchall()
+    replies = cur.execute("""SELECT * FROM replies;""").fetchall()
     file_name = "replies.csv"
 
     with open(f"{BASE_DIR}/{file_name}", "w", encoding="utf-8") as file:

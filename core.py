@@ -117,7 +117,6 @@ async def comment(account: str) -> str:
 
         if await page.query_selector("//div[@class='public-DraftEditorPlaceholder-inner' and text()='Post your reply']"):
             await asyncio.sleep(TIMEOUT)
-            pass
         else:
             await asyncio.sleep(TIMEOUT)
             await check_reply_box()
@@ -128,7 +127,7 @@ async def comment(account: str) -> str:
         try:
             button = await element.query_selector(xpath)
             await button.click()
-        except:
+        except Exception:
             await asyncio.sleep(TIMEOUT)
             await click_on_element(element, xpath)
 
@@ -176,4 +175,4 @@ async def comment(account: str) -> str:
     else:
         return (random_comment, reply_url)
     finally:
-        await go_to_main_page()
+        await go_to_main_page() # Back to the first page, so the procedure can be repeated again
