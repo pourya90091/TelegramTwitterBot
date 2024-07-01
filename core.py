@@ -170,4 +170,4 @@ async def comment(account: str) -> str:
         logger.error(f"Error occurred during replying to {account}.")
         return f"Error occurred during replying to {account}."
     else:
-        return reply_url
+        return (random_comment, reply_url)

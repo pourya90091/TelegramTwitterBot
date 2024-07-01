@@ -101,12 +101,15 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await context.bot.send_message(chat_id=query.message.chat_id, text=result)
         return None
 
+    random_comment = result[0]
+    reply_url = result[1]
+
     reply_markup = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("Reply URL", url=result),
+            InlineKeyboardButton("Reply URL", url=reply_url),
         ]
     ])
-    await context.bot.send_message(chat_id=query.message.chat_id, text=f"Reply URL (@{query.data}):", reply_markup=reply_markup)
+    await context.bot.send_message(chat_id=query.message.chat_id, text=f"{random_comment} (@{query.data}):", reply_markup=reply_markup)
 
 
 def run_bot() -> None:
