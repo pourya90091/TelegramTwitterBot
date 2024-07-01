@@ -11,8 +11,17 @@ import logging
 
 load_dotenv()
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename='logs.log', encoding='utf-8', level=logging.INFO)
+def get_logger():
+    root_logger= logging.getLogger(__name__)
+    root_logger.setLevel(logging.INFO)
+    handler = logging.FileHandler("logs.log", "a", "utf-8")
+    handler.setFormatter(logging.Formatter("%(levelname)s:%(filename)s:%(asctime)s:%(message)s"))
+    root_logger.addHandler(handler)
+
+    return root_logger
+
+
+logger = get_logger()
 
 BASE_URL = "https://x.com"
 
@@ -157,9 +166,9 @@ async def comment(account: str) -> str:
         reply_url = page.url
 
         database.add_reply(random_comment, reply_url, tweet_url, account)
-    except Exception as err:
-        logger.warning(f"Error occurred during replying to {account}.")
-        logger.error(err)
+        logger.info(f"New reply just added: {reply_url}.")
+    except Exception:
+        logger.error(f"Error occurred during replying to {account}.")
         return f"Error occurred during replying to {account}."
     else:
         return reply_url

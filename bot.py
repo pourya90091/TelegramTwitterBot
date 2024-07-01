@@ -1,10 +1,7 @@
 import os
-import logging
 import asyncio
 from pathlib import Path
-from datetime import datetime
 
-import telegram
 from telegram import (
     Update,
     User,
@@ -24,10 +21,8 @@ from telegram.ext import (
 )
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 from telegram.constants import ParseMode, ChatAction
-import sqlite3
-import re
 from dotenv import load_dotenv
-from core import initialize, comment
+from core import initialize, comment, logger
 import database
 from functools import wraps
 from pathlib import Path
@@ -134,9 +129,6 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
 
     database.init()
-    # loop.run_until_complete(initialize())
-
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(filename="logs.log", encoding="utf-8", level=logging.INFO)
+    loop.run_until_complete(initialize())
 
     run_bot()
