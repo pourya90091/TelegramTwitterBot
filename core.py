@@ -6,10 +6,13 @@ import asyncio
 import random
 import os
 import database
+import logging
 
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='logs.log', encoding='utf-8', level=logging.INFO)
 
 BASE_URL = "https://x.com"
 
@@ -38,9 +41,9 @@ async def initialize() -> None:
 
 
 async def init_contexts(contexts_number=3) -> None:
+    p = await async_playwright().start()
+    browser = await p.chromium.launch()
     for _ in range(contexts_number):
-        p = await async_playwright().start()
-        browser = await p.chromium.launch()
         context = await get_context(browser)
         contexts.append(context)
 
@@ -88,8 +91,8 @@ async def open_page(context: BrowserContext, url) -> None:
         print(f"Not loaded {url}")
 
 
-async def comment(account) -> list:
-    async def get_current_tweet():
+async def comment(account: str) -> str:
+    async def get_current_tweet() -> list[ElementHandle]:
         """Fetchs loaded tweets."""
 
         current_tweets = await tweets_container.query_selector_all(f"xpath=.//div[@data-testid='cellInnerDiv']//a[@href='/{account}' and @class='css-175oi2r r-1wbh5a2 r-dnmrzs r-1ny4l3l r-1loqt21']/ancestor::div[@data-testid='cellInnerDiv']")
@@ -101,17 +104,17 @@ async def comment(account) -> list:
 
         return current_tweets
 
-    async def check_reply_box():
+    async def check_reply_box() -> None:
         """Makes sure that the reply box is shown."""
 
         if await page.query_selector("//div[@class='public-DraftEditorPlaceholder-inner' and text()='Post your reply']"):
             await asyncio.sleep(TIMEOUT)
-            return True
+            pass
         else:
             await asyncio.sleep(TIMEOUT)
             await check_reply_box()
 
-    async def click_on_element(element: ElementHandle, xpath: str):
+    async def click_on_element(element: ElementHandle, xpath: str) -> None:
         """Makes sure that the button is pressed."""
 
         try:
@@ -121,37 +124,42 @@ async def comment(account) -> list:
             await asyncio.sleep(TIMEOUT)
             await click_on_element(element, xpath)
 
-    page = contexts[accounts.index(account)].pages[0]
-
     try:
-        tweets_container = await page.query_selector(tweets_container_xpath)
-    except Error:
-        return "Tweets container didn't load."
+        page = contexts[accounts.index(account)].pages[0]
 
-    current_tweets = await get_current_tweet()
+        try:
+            tweets_container = await page.query_selector(tweets_container_xpath)
+        except Error:
+            return "Tweets container didn't load."
 
-    random_comment = random.choice(comments)
-    random_tweet = random.choice(current_tweets)
+        current_tweets = await get_current_tweet()
 
-    # Clicking on a clickable spot of the tweet to open the tweet and save the url of that
-    await (await random_tweet.query_selector("xpath=.//div[@class='css-175oi2r r-18kxxzh r-1wron08 r-onrtq4 r-1awozwy']")).click()
-    await asyncio.sleep(TIMEOUT)
-    tweet_url = page.url
+        random_comment = random.choice(comments)
+        random_tweet = random.choice(current_tweets)
 
-    if database.is_tweet_exists(tweet_url):
-        return "An already replied tweet was selected."
+        # Clicking on a clickable spot of the tweet to open the tweet and save tweet_url
+        await (await random_tweet.query_selector("xpath=.//div[@class='css-175oi2r r-18kxxzh r-1wron08 r-onrtq4 r-1awozwy']")).click()
+        await asyncio.sleep(TIMEOUT)
+        tweet_url = page.url
 
-    await click_on_element(page, "xpath=.//button[@data-testid='reply']")
+        if database.is_tweet_exists(tweet_url):
+            return "An already replied tweet was selected."
 
-    await check_reply_box()
-    await page.keyboard.type(random_comment)
+        await click_on_element(page, "xpath=.//button[@data-testid='reply']")
 
-    await click_on_element(page, "xpath=.//button[@data-testid='tweetButton']")
+        await check_reply_box()
+        await page.keyboard.type(random_comment)
 
-    await click_on_element(page, "//span[text()='View']")
+        await click_on_element(page, "xpath=.//button[@data-testid='tweetButton']")
 
-    reply_url = page.url
+        await click_on_element(page, "//span[text()='View']")
 
-    database.add_reply(random_comment, reply_url, tweet_url, account)
+        reply_url = page.url
 
-    return reply_url
+        database.add_reply(random_comment, reply_url, tweet_url, account)
+    except Exception as err:
+        logger.warning(f"Error occurred during replying to {account}.")
+        logger.error(err)
+        return f"Error occurred during replying to {account}."
+    else:
+        return reply_url

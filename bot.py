@@ -30,10 +30,12 @@ from dotenv import load_dotenv
 from core import initialize, comment
 import database
 from functools import wraps
+from pathlib import Path
 
 
 load_dotenv()
 
+BASE_DIR = Path(__file__).parent.resolve()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMINS = os.getenv("ADMINS")
@@ -51,12 +53,12 @@ def admin_check(func):
 
 
 @admin_check
-async def start_handle(update: Update, context: CallbackContext):
+async def start_handle(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text("Hi!", parse_mode=ParseMode.HTML)
 
 
 @admin_check
-async def select_handle(update: Update, context: CallbackContext):
+async def select_handle(update: Update, context: CallbackContext) -> None:
     reply_markup = InlineKeyboardMarkup([
         [
             InlineKeyboardButton("DailyMonitor", callback_data="DailyMonitor"),
@@ -72,6 +74,13 @@ async def select_handle(update: Update, context: CallbackContext):
     await update.message.reply_text("Please choose an account:", reply_markup=reply_markup)
 
 
+@admin_check
+async def export_handle(update: Update, context: CallbackContext) -> None:
+    file_name = database.export_all_replies()
+
+    await update.message.reply_document(document=open(f"{BASE_DIR}/{file_name}", "rb"))
+
+
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Parses the CallbackQuery and calls core.comment() function."""
     query = update.callback_query
@@ -81,6 +90,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await query.answer()
     await context.bot.send_message(chat_id=query.message.chat_id, text=f"Action begins for @{query.data}")
     result = await comment(query.data)
+
+    if "Error occurred" in result:
+        await context.bot.send_message(chat_id=query.message.chat_id, text=result)
+        return None
 
     reply_markup = InlineKeyboardMarkup([
         [
@@ -102,6 +115,7 @@ def run_bot() -> None:
     # add handlers
     application.add_handler(CommandHandler("start", start_handle))
     application.add_handler(CommandHandler("select", select_handle))
+    application.add_handler(CommandHandler("export", export_handle))
     application.add_handler(CallbackQueryHandler(button))
 
     # start the bot
@@ -117,6 +131,6 @@ if __name__ == "__main__":
     loop.run_until_complete(initialize())
 
     logger = logging.getLogger(__name__)
-    logging.basicConfig(filename='logs.log', encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(filename="logs.log", encoding="utf-8", level=logging.INFO)
 
     run_bot()

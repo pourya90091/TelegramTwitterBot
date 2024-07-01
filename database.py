@@ -31,3 +31,19 @@ def is_tweet_exists(tweet_url):
     tweet = cur.execute(f"""SELECT tweet_owner FROM replies WHERE tweet_url = "{tweet_url}";""").fetchone()
 
     return True if tweet else False
+
+
+def export_all_replies():
+    replies = cur.execute(f"""SELECT * FROM replies;""").fetchall()
+    file_name = "replies.csv"
+
+    with open(f"{BASE_DIR}/{file_name}", "w", encoding="utf-8") as file:
+        file.write("reply_content, reply_url, tweet_url, tweet_owner\n")
+        for reply in replies:
+            reply_content = reply[0]
+            reply_url = reply[1]
+            tweet_url = reply[2]
+            tweet_owner = reply[3]
+            file.write(f"{reply_content}, {reply_url}, {tweet_url}, {tweet_owner}\n")
+
+    return file_name
