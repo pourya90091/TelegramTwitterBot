@@ -135,9 +135,9 @@ async def comment(account: str) -> str:
         url = f"{BASE_URL}/{account}"
         await page.goto(url, timeout=0, wait_until="load")
 
-    try:
-        page = contexts[accounts.index(account)].pages[0]
+    page = contexts[accounts.index(account)].pages[0]
 
+    try:
         try:
             tweets_container = await page.query_selector(tweets_container_xpath)
         except Error:

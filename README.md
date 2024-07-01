@@ -31,6 +31,8 @@ playwright install-deps chromium
 python bot.py
 ```
 
+Then you can go to Telegram and open the bot you created in https://t.me/BotFather and send `/start` command, then the bot will show you a list of commands.
+
 ## Tips
 
 >**Tip** : Python 3.10 or higher is required.
