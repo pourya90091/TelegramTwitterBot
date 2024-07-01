@@ -54,7 +54,13 @@ def admin_check(func):
 
 @admin_check
 async def start_handle(update: Update, context: CallbackContext) -> None:
-    await update.message.reply_text("Hi!", parse_mode=ParseMode.HTML)
+    await update.message.reply_text(f"""
+Hey @{update.message.from_user.username}, i'm here to help you out.
+                                    
+My commands:
+    /select
+    /export
+        """, parse_mode=ParseMode.HTML)
 
 
 @admin_check
@@ -128,7 +134,7 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
 
     database.init()
-    loop.run_until_complete(initialize())
+    # loop.run_until_complete(initialize())
 
     logger = logging.getLogger(__name__)
     logging.basicConfig(filename="logs.log", encoding="utf-8", level=logging.INFO)
