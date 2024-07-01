@@ -166,8 +166,8 @@ async def comment(account: str) -> str:
 
         database.add_reply(random_comment, reply_url, tweet_url, account)
         logger.info(f"New reply just added: {reply_url}.")
-    except Exception:
-        logger.error(f"Error occurred during replying to {account}.")
-        return f"Error occurred during replying to {account}."
+    except Exception as err:
+        logger.error(f"Error occurred: {err} during replying to @{account}.")
+        return f"Error occurred: {err} during replying to @{account}."
     else:
         return (random_comment, reply_url)
