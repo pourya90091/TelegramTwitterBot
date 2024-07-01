@@ -132,6 +132,10 @@ async def comment(account: str) -> str:
             await asyncio.sleep(TIMEOUT)
             await click_on_element(element, xpath)
 
+    async def go_to_main_page():
+        url = f"{BASE_URL}/{account}"
+        await page.goto(url, timeout=0, wait_until="load")
+
     try:
         page = contexts[accounts.index(account)].pages[0]
 
@@ -171,3 +175,5 @@ async def comment(account: str) -> str:
         return f"Error occurred: {err} during replying to @{account}."
     else:
         return (random_comment, reply_url)
+    finally:
+        await go_to_main_page()
